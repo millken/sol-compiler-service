@@ -1,3 +1,4 @@
-/gen
-/node_modules
-/package-lock.json
+gen
+node_modules
+nexe-linux
+server

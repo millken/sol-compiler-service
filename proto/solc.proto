@@ -9,13 +9,12 @@ option java_outer_classname = "SolcProto";
 package solc;
 
 message CompilerRequest {
-  string language = 1;
-  repeated CompilerSources sources = 2;
-  CompilerSettings settings = 3;
+  string version = 1;
+  string language = 2;
+  repeated CompilerSources sources = 3;
+  CompilerSettings settings = 4;
 }
-message CompilerSettings {
-  CompilerOptimizer optimizer = 1;
-}
+message CompilerSettings { CompilerOptimizer optimizer = 1; }
 message CompilerOptimizer {
   bool enabled = 1;
   int32 runs = 2;
