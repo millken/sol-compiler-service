@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+// protoc --go_out=plugins=grpc:.. solc.proto
+option go_package = "gen/solgo";
+option java_multiple_files = true;
+option java_package = "io.iotex.scout.solc";
+option java_outer_classname = "SolcProto";
+
+package solc;
+
+message CompilerRequest {
+  string language = 1;
+  repeated CompilerSources sources = 2;
+  CompilerSettings settings = 3;
+}
+message CompilerSettings {
+  CompilerOptimizer optimizer = 1;
+}
+message CompilerOptimizer {
+  bool enabled = 1;
+  int32 runs = 2;
+}
+message CompilerSources {
+  string name = 1;
+  string content = 2;
+}
+message CompilerResponse { string content = 1; }
+
+service CompilerService {
+  rpc solcCompiler(CompilerRequest) returns (CompilerResponse) {};
+}
