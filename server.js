@@ -39,9 +39,9 @@ function runServer() {
   let server = new grpc.Server();
   server.addService(proto.iotex.SolcService.service, {
     compilerStandardJSON: compilerStandardJSON,
-     compiler: compiler,
-     verifier: verifier,
-    });
+    compiler: compiler,
+    verifier: verifier,
+  });
   server.bind(program.opts().listen, grpc.ServerCredentials.createInsecure());
   console.log("starting grpc server on: " + program.opts().listen);
   server.start();
@@ -96,7 +96,7 @@ function compilerStandardJSON(call, callBack) {
     return
   }
   let soljson = solc.setupMethods(require(compilerFile));
-  
+
   let inputJSON = call.request.inputJSON || '{}';
   let output = soljson.compile(inputJSON);
   console.debug("compilerStandardJSON grpc response :", output)
@@ -107,45 +107,46 @@ function verifier(call, callBack) {
   console.debug("verifier grpc request :", call.request)
   let version = call.request.version || '';
   let verMatch = version.match(/\d+?\.\d+?\.\d+?/gi);
-  if(version == "" || verMatch.length == 0) {
+  if (version == "" || verMatch.length == 0) {
     console.error("verifier compiler version error: %s", version)
-    callBack(null, {verified: false});
+    callBack(null, { verified: false });
     return;
   }
   let ver = verMatch[0] || '0.0.0';
-  let bytecodeFromChain = call.request.bytecodeFromChain|| '';
-  let bytecodeFromCompiler = call.request.bytecodeFromCompiler|| '';
+  let bytecodeFromChain = call.request.bytecodeFromChain || '';
+  let bytecodeFromCompiler = call.request.bytecodeFromCompiler || '';
   let bytecodeFromChainStartingPoint, bytecodeFromChainEndingPoint;
   let bytecodeFromCompilerStartingPoint, bytecodeFromCompilerEndingPoint;
 
-  if (compareVersions(ver, "0.4.7") >= 0){
+  if (compareVersions(ver, "0.4.7") >= 0) {
     if (compareVersions(ver, "0.4.22") >= 0) {
-			// if solc version is at least 0.4.22, initial bytecode has 6080... instead of 6060...
-			bytecodeFromChainStartingPoint = bytecodeFromChain.lastIndexOf('6080604052');
-			bytecodeFromCompilerStartingPoint = bytecodeFromCompiler.lastIndexOf('6080604052');
-			// a165627a7a72305820 is a fixed prefix of swarm info that was appended to contract bytecode
-			// the beginning of swarm_info is always the ending point of the actual contract bytecode
+      // if solc version is at least 0.4.22, initial bytecode has 6080... instead of 6060...
+      bytecodeFromChainStartingPoint = bytecodeFromChain.lastIndexOf('6080604052');
+      bytecodeFromCompilerStartingPoint = bytecodeFromCompiler.lastIndexOf('6080604052');
+      // a165627a7a72305820 is a fixed prefix of swarm info that was appended to contract bytecode
+      // the beginning of swarm_info is always the ending point of the actual contract bytecode
 
-		} else {
-			// if solc version is at least 0.4.7, then swarm hash is included into the bytecode.
-			// every bytecode starts with a fixed opcode: "PUSH1 0x60 PUSH1 0x40 MSTORE"
-			// which is 6060604052 in bytecode whose length is 10
-			// var fixed_prefix= bytecode.slice(0,10);
+    } else {
+      // if solc version is at least 0.4.7, then swarm hash is included into the bytecode.
+      // every bytecode starts with a fixed opcode: "PUSH1 0x60 PUSH1 0x40 MSTORE"
+      // which is 6060604052 in bytecode whose length is 10
+      // var fixed_prefix= bytecode.slice(0,10);
 
-			// every bytecode from compiler may or may not have constructor bytecode inserted before
-			// actual deployed code (since constructor is optional).So there might be multiple matching
-			// prefix of "6060604052", and actual deployed code starts at the last such pattern.
-			bytecodeFromChainStartingPoint = bytecodeFromChain.lastIndexOf('6060604052');
-			bytecodeFromCompilerStartingPoint = bytecodeFromCompiler.lastIndexOf('6060604052');
-			// a165627a7a72305820 is a fixed prefix of swarm info that was appended to contract bytecode
-			// the beginning of swarm_info is always the ending point of the actual contract bytecode
-		}
-    bytecodeFromChainEndingPoint = bytecodeFromChain.search('a165627a7a72305820');
-    bytecodeFromCompilerEndingPoint = bytecodeFromCompiler.search('a165627a7a72305820');
+      // every bytecode from compiler may or may not have constructor bytecode inserted before
+      // actual deployed code (since constructor is optional).So there might be multiple matching
+      // prefix of "6060604052", and actual deployed code starts at the last such pattern.
+      bytecodeFromChainStartingPoint = bytecodeFromChain.lastIndexOf('6060604052');
+      bytecodeFromCompilerStartingPoint = bytecodeFromCompiler.lastIndexOf('6060604052');
+      // a165627a7a72305820 is a fixed prefix of swarm info that was appended to contract bytecode
+      // the beginning of swarm_info is always the ending point of the actual contract bytecode
+      // a265627a7a72305820 may is optimizerd code
+    }
+    bytecodeFromChainEndingPoint = bytecodeFromChain.search('65627a7a72305820');
+    bytecodeFromCompilerEndingPoint = bytecodeFromCompiler.search('65627a7a72305820');
     bytecodeFromChain = bytecodeFromChain.slice(bytecodeFromChainStartingPoint, bytecodeFromChainEndingPoint);
-    bytecodeFromCompiler = bytecodeFromCompiler.slice(bytecodeFromChainStartingPoint, bytecodeFromChainEndingPoint);
+    bytecodeFromCompiler = bytecodeFromCompiler.slice(bytecodeFromCompilerStartingPoint, bytecodeFromCompilerEndingPoint);
   }
-  callBack(null, {verified: bytecodeFromChain == bytecodeFromCompiler});
+  callBack(null, { verified: bytecodeFromChain == bytecodeFromCompiler });
 }
 
 
@@ -180,13 +181,14 @@ function compiler(call, callBack) {
       }
     }
   };
-  let optimizer = call.request.optimizer || { enabled: false, runs: 200 }
+  let optimizer = call.request.settings.optimizer || { enabled: false, runs: 200 }
   input.settings.optimizer.enabled = optimizer.enabled || false;
   input.settings.optimizer.runs = optimizer.runs || 200;
   let sources = call.request.sources || [];
   for (var k in sources) {
     input.sources[sources[k].name || ""] = { content: sources[k].content || "" };
   }
+  console.debug("compiler grpc JSON.stringify(input) :", JSON.stringify(input))
 
   let output = soljson.compile(JSON.stringify(input));
   console.debug("compiler grpc response :", output)
