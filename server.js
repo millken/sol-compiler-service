@@ -7,7 +7,7 @@ let compareVersions = require('compare-versions');
 const program = require('commander');
 
 program
-  .version('0.1.0')
+  .version('1.0.0')
   .option('-d, --debug', 'debug level', false)
   .option('-l, --listen <address>', 'grpc server listen address', '0.0.0.0:2021')
   .option('-b, --solcbin <folder>', 'directory with solc json bin files', process.cwd() + '/solc-bin/')
@@ -103,10 +103,11 @@ function compilerStandardJSON(call, callBack) {
   callBack(null, compilerResponse(output));
 }
 
+//https://github.com/blockscout/blockscout/blob/master/apps/explorer/lib/explorer/smart_contract/verifier.ex
 function verifier(call, callBack) {
   console.debug("verifier grpc request :", call.request)
   let version = call.request.version || '';
-  let verMatch = version.match(/\d+?\.\d+?\.\d+?/gi);
+  let verMatch = version.match(/\d+?\.\d+?\.\d+/gi);
   if (version == "" || verMatch.length == 0) {
     console.error("verifier compiler version error: %s", version)
     callBack(null, { verified: false });
@@ -117,35 +118,32 @@ function verifier(call, callBack) {
   let bytecodeFromCompiler = call.request.bytecodeFromCompiler || '';
   let bytecodeFromChainStartingPoint, bytecodeFromChainEndingPoint;
   let bytecodeFromCompilerStartingPoint, bytecodeFromCompilerEndingPoint;
+  let startIdx = '-B-';
+  let endIdx = '-E-';
 
-  if (compareVersions(ver, "0.4.7") >= 0) {
-    if (compareVersions(ver, "0.4.22") >= 0) {
-      // if solc version is at least 0.4.22, initial bytecode has 6080... instead of 6060...
-      bytecodeFromChainStartingPoint = bytecodeFromChain.lastIndexOf('6080604052');
-      bytecodeFromCompilerStartingPoint = bytecodeFromCompiler.lastIndexOf('6080604052');
-      // a165627a7a72305820 is a fixed prefix of swarm info that was appended to contract bytecode
-      // the beginning of swarm_info is always the ending point of the actual contract bytecode
-
-    } else {
-      // if solc version is at least 0.4.7, then swarm hash is included into the bytecode.
-      // every bytecode starts with a fixed opcode: "PUSH1 0x60 PUSH1 0x40 MSTORE"
-      // which is 6060604052 in bytecode whose length is 10
-      // var fixed_prefix= bytecode.slice(0,10);
-
-      // every bytecode from compiler may or may not have constructor bytecode inserted before
-      // actual deployed code (since constructor is optional).So there might be multiple matching
-      // prefix of "6060604052", and actual deployed code starts at the last such pattern.
-      bytecodeFromChainStartingPoint = bytecodeFromChain.lastIndexOf('6060604052');
-      bytecodeFromCompilerStartingPoint = bytecodeFromCompiler.lastIndexOf('6060604052');
-      // a165627a7a72305820 is a fixed prefix of swarm info that was appended to contract bytecode
-      // the beginning of swarm_info is always the ending point of the actual contract bytecode
-      // a265627a7a72305820 may is optimizerd code
-    }
-    bytecodeFromChainEndingPoint = bytecodeFromChain.search('65627a7a72305820');
-    bytecodeFromCompilerEndingPoint = bytecodeFromCompiler.search('65627a7a72305820');
-    bytecodeFromChain = bytecodeFromChain.slice(bytecodeFromChainStartingPoint, bytecodeFromChainEndingPoint);
-    bytecodeFromCompiler = bytecodeFromCompiler.slice(bytecodeFromCompilerStartingPoint, bytecodeFromCompilerEndingPoint);
+  if (compareVersions(ver, "0.6.0") >= 0) {
+    startIdx = '6080604052';
+    endIdx = 'a265627a7a72315820';
+  } else if (compareVersions(ver, "0.5.11") >= 0) {
+    startIdx = '6080604052';
+    endIdx = 'a265627a7a72315820';
+  } else if (compareVersions(ver, "0.5.10") >= 0) {
+    startIdx = '6080604052';
+    endIdx = 'a265627a7a72305820';
+  } else if (compareVersions(ver, "0.4.22") >= 0) {
+    startIdx = '6080604052';
+    endIdx = 'a265627a7a72305820';
+  } else if (compareVersions(ver, "0.4.7") >= 0) {
+    startIdx = '6060604052';
+    endIdx = 'a165627a7a72305820';
   }
+  console.debug("ver: " + ver + " startIdx: " + startIdx + " endIdx: "+ endIdx)
+  bytecodeFromChainStartingPoint = bytecodeFromChain.lastIndexOf(startIdx);
+  bytecodeFromCompilerStartingPoint = bytecodeFromCompiler.lastIndexOf(startIdx);
+  bytecodeFromChainEndingPoint = bytecodeFromChain.search(endIdx);
+  bytecodeFromCompilerEndingPoint = bytecodeFromCompiler.search(endIdx);
+  bytecodeFromChain = bytecodeFromChain.slice(bytecodeFromChainStartingPoint, bytecodeFromChainEndingPoint);
+  bytecodeFromCompiler = bytecodeFromCompiler.slice(bytecodeFromCompilerStartingPoint, bytecodeFromCompilerEndingPoint);
   callBack(null, { verified: bytecodeFromChain == bytecodeFromCompiler });
 }
 
