@@ -7,7 +7,7 @@ let compareVersions = require('compare-versions');
 const program = require('commander');
 
 program
-  .version('1.0.0')
+  .version('1.1.0')
   .option('-d, --debug', 'debug level', false)
   .option('-l, --listen <address>', 'grpc server listen address', '0.0.0.0:2021')
   .option('-b, --solcbin <folder>', 'directory with solc json bin files', process.cwd() + '/solc-bin/')
@@ -123,7 +123,7 @@ function verifier(call, callBack) {
 
   if (compareVersions(ver, "0.6.0") >= 0) {
     startIdx = '6080604052';
-    endIdx = 'a265627a7a72315820';
+    endIdx = 'a264697066735822';
   } else if (compareVersions(ver, "0.5.11") >= 0) {
     startIdx = '6080604052';
     endIdx = 'a265627a7a72315820';
@@ -132,7 +132,7 @@ function verifier(call, callBack) {
     endIdx = 'a265627a7a72305820';
   } else if (compareVersions(ver, "0.4.22") >= 0) {
     startIdx = '6080604052';
-    endIdx = 'a265627a7a72305820';
+    endIdx = 'a165627a7a72305820';
   } else if (compareVersions(ver, "0.4.7") >= 0) {
     startIdx = '6060604052';
     endIdx = 'a165627a7a72305820';
