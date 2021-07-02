@@ -138,8 +138,8 @@ function verifier(call, callBack) {
     endIdx = 'a165627a7a72305820';
   }
   console.debug("ver: " + ver + " startIdx: " + startIdx + " endIdx: "+ endIdx)
-  bytecodeFromChainStartingPoint = bytecodeFromChain.lastIndexOf(startIdx);
-  bytecodeFromCompilerStartingPoint = bytecodeFromCompiler.lastIndexOf(startIdx);
+  bytecodeFromChainStartingPoint = bytecodeFromChain.search(startIdx);
+  bytecodeFromCompilerStartingPoint = bytecodeFromCompiler.search(startIdx);
   bytecodeFromChainEndingPoint = bytecodeFromChain.search(endIdx);
   bytecodeFromCompilerEndingPoint = bytecodeFromCompiler.search(endIdx);
   bytecodeFromChain = bytecodeFromChain.slice(bytecodeFromChainStartingPoint, bytecodeFromChainEndingPoint);
@@ -174,7 +174,7 @@ function compiler(call, callBack) {
       },
       outputSelection: {
         '*': {
-          '*': ["abi", "metadata", "evm.bytecode", "evm.methodIdentifiers", "evm.gasEstimates"]
+          '*': ["abi", "metadata", "evm.bytecode", "evm.deployedBytecode", "evm.methodIdentifiers", "evm.gasEstimates"]
         }
       }
     }
