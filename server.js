@@ -121,6 +121,9 @@ function verifier(call, callBack) {
   let startIdx = '-B-';
   let endIdx = '-E-';
 
+  bytecodeFromChain = getBytecodeWithoutMetadata(bytecodeFromChain)
+  bytecodeFromCompiler = getBytecodeWithoutMetadata(bytecodeFromCompiler)
+
   if (compareVersions(ver, "0.6.0") >= 0) {
     startIdx = '6080604052';
     endIdx = 'a264697066735822';
@@ -147,6 +150,11 @@ function verifier(call, callBack) {
   callBack(null, { verified: bytecodeFromChain == bytecodeFromCompiler });
 }
 
+function getBytecodeWithoutMetadata(bytecode) {
+  // Last 4 chars of bytecode specify byte size of metadata component,
+  const metadataSize = parseInt(bytecode.slice(-4), 16) * 2 + 4;
+  return bytecode.slice(0, bytecode.length - metadataSize);
+}
 
 function compiler(call, callBack) {
   console.debug("compiler grpc request :", call.request)
