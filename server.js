@@ -180,7 +180,7 @@ function compiler(call, callBack) {
         enabled: false,
         runs: 200,
       },
-      evmVersion: '',
+      //evmVersion: '',
       outputSelection: {
         '*': {
           '*': ["abi", "metadata", "evm.bytecode", "evm.deployedBytecode", "evm.methodIdentifiers", "evm.gasEstimates"]
@@ -191,7 +191,10 @@ function compiler(call, callBack) {
   let optimizer = call.request.settings.optimizer || { enabled: false, runs: 200 }
   input.settings.optimizer.enabled = optimizer.enabled || false;
   input.settings.optimizer.runs = optimizer.runs || 200;
-  input.settings.evmVersion = call.request.settings.evmVersion || '';
+  if (call.request.settings.evmVersion != '') {
+      input.settings.evmVersion = call.request.settings.evmVersion ;
+  }
+
   let sources = call.request.sources || [];
   for (var k in sources) {
     input.sources[sources[k].name || ""] = { content: sources[k].content || "" };

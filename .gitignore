@@ -4,3 +4,4 @@ nexe-linux
 server
 test1.js
 solc-bin
+*.log
