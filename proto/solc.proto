@@ -38,7 +38,7 @@ message VerifierRequest {
 
 message VerifierResponse { bool verified = 1; }
 
-service SolcService {
+service Solc {
   rpc compilerStandardJSON(CompilerRequest) returns (CompilerResponse) {};
   rpc compiler(CompilerRequest) returns (CompilerResponse) {};
   rpc verifier(VerifierRequest) returns (VerifierResponse) {};
