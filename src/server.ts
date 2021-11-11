@@ -2,15 +2,18 @@ import { Server, ServerCredentials } from '@grpc/grpc-js'
 
 import { Solc, SolcService } from './service/Solc'
 import { Health, HealthService } from './service/Health'
-import { logger } from './util'
 import dotenv from 'dotenv'
-
 import debug from 'debug'
 
-debug.enable('*')
+const log = debug('server')
+log.enabled = true
 dotenv.config({ path: '.env' })
 
 const port: string | number = process.env.PORT || 50051
+const envDEBUG: string = process.env.DEBUG || ''
+if (envDEBUG !== "") {
+  debug.enable(envDEBUG)
+}
 
 const server = new Server({
   'grpc.max_receive_message_length': -1,
@@ -24,6 +27,6 @@ server.bindAsync((`0.0.0.0:${port}`), ServerCredentials.createInsecure(), (err: 
     throw err
   }
 
-  logger.info(`gRPC:Server:${bindPort}`, new Date().toLocaleString())
+  log(`gRPC server listening ON :${bindPort}`, new Date().toLocaleString())
   server.start()
 })

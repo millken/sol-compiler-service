@@ -13,22 +13,24 @@ import {
     CompilerSettings
 } from '../../model/solc_pb'
 import { logger, ServiceError } from '../util'
-import { getWasmCompiler, CompilerWasm } from '../solc/compiler'
+import { getWasmCompiler, CompilerWasm, wasmCompile } from '../solc/compiler'
 import debug from 'debug'
-const solc = require('solc')
+
 const log = debug('service:solc')
 class Solc implements ISolcServer {
     [method: string]: UntypedHandleCall;
 
     public compiler(call: ServerUnaryCall<CompilerRequest, CompilerResponse>, callback: sendUnaryData<CompilerResponse>): void {
-        const res = new CompilerResponse()
-        const version = call.request.getVersion()
+        log("request compiler")
 
+        const version = call.request.getVersion()
         if (version === '') {
             // https://grpc.io/grpc/node/grpc.html#.status__anchor
             return callback(new ServiceError(status.INVALID_ARGUMENT, 'InvalidVersion'), null)
         }
+
         let wasmCompiler: CompilerWasm = {
+            version: version,
             solcPath: ''
         }
         try {
@@ -36,7 +38,7 @@ class Solc implements ISolcServer {
         } catch (e) {
             return callback(e as Error, null)
         }
-        const soljson = solc.setupMethods(require(wasmCompiler.solcPath))
+
         const language = call.request.getLanguage() || 'Solidity'
         const input: any = {
             language: language,
@@ -79,15 +81,49 @@ class Solc implements ISolcServer {
         for (const k in sources) {
             input.sources[sources[k].getName() || ''] = { content: sources[k].getContent() || '' }
         }
-        const inputJSON = JSON.stringify(input)
-        log('inputJSON: ', inputJSON)
+        wasmCompiler.inputJSON = JSON.stringify(input)
+        
+        const compilerRes = new CompilerResponse()
 
-        const output = soljson.compile(inputJSON);
-        res.setContent(output)
-        callback(null, res);
+        wasmCompile(wasmCompiler)
+
+        if (wasmCompiler.outputJSON !== undefined) {
+            compilerRes.setContent(wasmCompiler.outputJSON)
+        }
+
+        callback(null, compilerRes);
     }
 
     public compilerStandardJSON(call: ServerUnaryCall<CompilerRequest, CompilerResponse>, callback: sendUnaryData<CompilerResponse>): void {
+        log("request compilerStandardJSON")
+        const version = call.request.getVersion()
+        if (version === '') {
+            return callback(new ServiceError(status.INVALID_ARGUMENT, 'InvalidVersion'), null)
+        }
+        let wasmCompiler: CompilerWasm = {
+            version: version,
+            solcPath: ''
+        }
+        try {
+            wasmCompiler = getWasmCompiler(version)
+        } catch (e) {
+            return callback(e as Error, null)
+        }
+
+        const inputJSON = call.request.getInputjson()
+        if (version === '') {
+            return callback(new ServiceError(status.INVALID_ARGUMENT, 'InvalidInputJSON'), null)
+        }
+        wasmCompiler.inputJSON = inputJSON
+        const compilerRes = new CompilerResponse()
+
+        wasmCompile(wasmCompiler)
+
+        if (wasmCompiler.outputJSON !== undefined) {
+            compilerRes.setContent(wasmCompiler.outputJSON)
+        }
+
+        callback(null, compilerRes);
     }
 
     public verifier(call: ServerUnaryCall<VerifierRequest, VerifierResponse>, callback: sendUnaryData<VerifierResponse>): void {
