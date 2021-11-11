@@ -5,3 +5,7 @@ test1.js
 solc-bin
 *.log
 .env
+.vscode
+.history
+.DS_Store
+/dist/
