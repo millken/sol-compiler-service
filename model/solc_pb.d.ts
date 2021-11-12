@@ -23,6 +23,11 @@ export class CompilerRequest extends jspb.Message {
     getInputjson(): string;
     setInputjson(value: string): CompilerRequest;
 
+    hasVerify(): boolean;
+    clearVerify(): void;
+    getVerify(): Verify | undefined;
+    setVerify(value?: Verify): CompilerRequest;
+
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): CompilerRequest.AsObject;
     static toObject(includeInstance: boolean, msg: CompilerRequest): CompilerRequest.AsObject;
@@ -40,6 +45,7 @@ export namespace CompilerRequest {
         sourcesList: Array<CompilerSources.AsObject>,
         settings?: CompilerSettings.AsObject,
         inputjson: string,
+        verify?: Verify.AsObject,
     }
 }
 
@@ -118,6 +124,8 @@ export namespace CompilerSources {
 export class CompilerResponse extends jspb.Message { 
     getContent(): string;
     setContent(value: string): CompilerResponse;
+    getVerified(): string;
+    setVerified(value: string): CompilerResponse;
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): CompilerResponse.AsObject;
@@ -132,6 +140,30 @@ export class CompilerResponse extends jspb.Message {
 export namespace CompilerResponse {
     export type AsObject = {
         content: string,
+        verified: string,
+    }
+}
+
+export class Verify extends jspb.Message { 
+    getVersion(): string;
+    setVersion(value: string): Verify;
+    getBytecode(): string;
+    setBytecode(value: string): Verify;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): Verify.AsObject;
+    static toObject(includeInstance: boolean, msg: Verify): Verify.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: Verify, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): Verify;
+    static deserializeBinaryFromReader(message: Verify, reader: jspb.BinaryReader): Verify;
+}
+
+export namespace Verify {
+    export type AsObject = {
+        version: string,
+        bytecode: string,
     }
 }
 

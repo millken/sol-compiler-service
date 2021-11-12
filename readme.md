@@ -27,7 +27,6 @@ npm start
 
 ```sh
 # 1. Request
-npm run client #= node dist/client
 # 2. with Parameter
 npm run client blahblahblah
 # 3. Error

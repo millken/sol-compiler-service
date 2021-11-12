@@ -12,13 +12,23 @@ describe("bytecode unit test", () => {
         TestDeployByteCode01 = new Bytecode(`6080604052348015600f57600080fd5b506004361060325760003560e01c80632e64cec11460375780636057361d14604f575b600080fd5b603d606b565b60408051918252519081900360200190f35b606960048036036020811015606357600080fd5b50356071565b005b60005490565b60005556fea264697066735822122011891de1891192ad7d784a4b314e9d098e75d0d1d31ec33ada031a31852d6deb64736f6c63430007060033`)
     })
 
-    describe("executable section", () => {
-        it("bytecode shoud be include deployBytecode", async () => {
-            await expect(TestByteCode01.getExecutableSection()).to.contain(TestDeployByteCode01.getExecutableSection());
-        })
+    it("bytecode shoud be include deployBytecode", async () => {
+        await expect(TestByteCode01.getExecutableSection()).to.contain(TestDeployByteCode01.getExecutableSection());
+    })
 
-        it("version compare", async () => {
-            await expect(TestByteCode01.getInferredSolcVersion()).to.equal(TestDeployByteCode01.getInferredSolcVersion()).to.equal("0.7.6");
-        });
+    it("version compare", async () => {
+        await expect(TestByteCode01.getInferredSolcVersion()).to.equal(TestDeployByteCode01.getInferredSolcVersion()).to.equal("0.7.6");
+    });
+
+    it("getInferredSolcVersion", async () => {
+        await expect(TestByteCode01.getInferredSolcVersion()).to.equal(TestDeployByteCode01.getInferredSolcVersion()).to.equal("0.7.6");
+    });
+
+    it("hasMetadata", async () => {
+        await expect(TestByteCode01.hasMetadata()).to.equal(TestDeployByteCode01.hasMetadata()).to.equal(true);
+    })
+
+    it("isOvmInferred", async () => {
+        await expect(TestByteCode01.isOvmInferred()).to.equal(TestDeployByteCode01.isOvmInferred()).to.equal(false);
     })
 })

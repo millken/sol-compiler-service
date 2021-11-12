@@ -15,6 +15,7 @@ message CompilerRequest {
   CompilerSettings settings = 4;
   //use standard json as input source
   string inputJSON = 5;
+  Verify verify = 6;
 }
 message CompilerSettings { 
   CompilerOptimizer optimizer = 1; 
@@ -28,7 +29,15 @@ message CompilerSources {
   string name = 1;
   string content = 2;
 }
-message CompilerResponse { string content = 1; }
+message CompilerResponse { 
+  string content = 1; 
+  string verified = 2;
+}
+
+message Verify {
+  string version = 1;
+  string bytecode = 2;
+}
 
 message VerifierRequest {
   string version = 1;

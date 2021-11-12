@@ -12,8 +12,9 @@ import {
     CompilerOptimizer,
     CompilerSettings
 } from '../../model/solc_pb'
-import { logger, ServiceError } from '../util'
-import { getWasmCompiler, CompilerWasm, wasmCompile } from '../solc/compiler'
+import { ServiceError,hasCompilationErrors } from '../util'
+import { getWasmCompiler, wasmCompile } from '../solc/compiler'
+import {VerifyContract, CompilerWasm} from '../solc/types'
 import debug from 'debug'
 
 const log = debug('service:solc')
@@ -87,10 +88,18 @@ class Solc implements ISolcServer {
 
         wasmCompile(wasmCompiler)
 
-        if (wasmCompiler.outputJSON !== undefined) {
+        if (wasmCompiler.outputJSON) {
             compilerRes.setContent(wasmCompiler.outputJSON)
         }
+        console.log(compilerRes.getContent())
 
+        const verify = call.request.getVerify()
+        if(verify) {
+            const verifyContract:VerifyContract = {
+                bytecode: verify.getBytecode()
+            }
+            log(verify.getVersion())
+        }
         callback(null, compilerRes);
     }
 

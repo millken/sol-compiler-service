@@ -2,22 +2,19 @@
 import debug from 'debug'
 const solc = require('solc')
 const log = debug('solc:compiler')
+import {CompilerWasm} from './types'
 
-export interface CompilerWasm {
-    version:string;
-    solcPath: string;
-    inputJSON?: string;
-    outputJSON?: string;
-  }
 
-export  function wasmCompile(wasm: CompilerWasm): void{
+export  function wasmCompile(wasm: CompilerWasm): any{
   console.time("WASM Compile time")
   const soljson = solc.setupMethods(require(wasm.solcPath))
   log('version: ', wasm.version)
   log('solcPATH: ', wasm.solcPath)
   log('inputJSON: ', wasm.inputJSON)
-  wasm.outputJSON = soljson.compile(wasm.inputJSON);
+  const output = soljson.compile(wasm.inputJSON);
+  wasm.outputJSON = JSON.parse(output)
   console.timeEnd("WASM Compile time")
+  return wasm.outputJSON
 }
 
 export function getWasmCompiler (version:string): CompilerWasm {
