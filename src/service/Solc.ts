@@ -2,6 +2,7 @@ import {
     sendUnaryData, ServerUnaryCall,
     status, UntypedHandleCall, ServerErrorResponse
 } from '@grpc/grpc-js'
+import fsExtra from "fs-extra";
 
 import { SolcService, ISolcService, ISolcServer } from '../../model/solc_grpc_pb'
 import {
@@ -16,6 +17,7 @@ import { ServiceError,hasCompilationErrors } from '../util'
 import { getWasmCompiler, wasmCompile } from '../solc/compiler'
 import {VerifyContract, CompilerWasm} from '../solc/types'
 import debug from 'debug'
+import { Artifacts } from '../solc/artifacts';
 
 const log = debug('service:solc')
 class Solc implements ISolcServer {
@@ -129,7 +131,19 @@ class Solc implements ISolcServer {
         wasmCompile(wasmCompiler)
 
         if (wasmCompiler.outputJSON !== undefined) {
+            fsExtra.writeJson("output.json", wasmCompiler.outputJSON, { spaces: 2 });
             compilerRes.setContent(wasmCompiler.outputJSON)
+        }
+
+        const verify = call.request.getVerify()
+        if(verify !== undefined) {
+            const verifyContract:VerifyContract = {
+                bytecode: verify.getBytecode()
+            }
+            //fsExtra.writeFile("input.txt", inputJSON);
+            //fsExtra.writeJSONSync("input.json", JSON.parse(call.request.getInputjson()));
+            new Artifacts(wasmCompiler.outputJSON)
+            log(verify.getVersion())
         }
 
         callback(null, compilerRes);

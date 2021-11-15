@@ -10,7 +10,7 @@ export  function wasmCompile(wasm: CompilerWasm): any{
   const soljson = solc.setupMethods(require(wasm.solcPath))
   log('version: ', wasm.version)
   log('solcPATH: ', wasm.solcPath)
-  log('inputJSON: ', wasm.inputJSON)
+  //log('inputJSON: ', wasm.inputJSON)
   const output = soljson.compile(wasm.inputJSON);
   wasm.outputJSON = JSON.parse(output)
   console.timeEnd("WASM Compile time")

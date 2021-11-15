@@ -1,108 +1,72 @@
 import {
-    Artifact,
     Artifacts as IArtifacts,
     BuildInfo,
     CompilerInput,
-    CompilerOutput,
     DebugFile,
   } from "hardhat/types";
-  import {CompilerWasm} from './types'
+  import {
+    CompilerWasm,
+     Artifact,
+    CompilerOutput,
+    ArtifactName,
+  } from './types'
+  import fsExtra from "fs-extra"
+  import debug from 'debug'
 
-
+  const log = debug('solc:artifacts')
   export class Artifacts  {
 //     private _buildInfosGlob: string;
-    private _store: any;
+    private _cache: Map<ArtifactName, Artifact> = new Map();
   
-    constructor(outputJSON: any) {
-
-      this._generator(outputJSON)
+    constructor(outputJSON: CompilerOutput) {
+      for (const [sourceName, contract] of Object.entries(
+        outputJSON.contracts ?? {}
+      )) {
+        for (const [contractName, contractOutput] of Object.entries(contract  ?? {})) {
+          log("sourceName: " + sourceName + ", contractName: " + contractName)
+          const artifact: Artifact = {
+            _format: "hh-sol-artifact-1",
+            contractName: contractName,
+            sourceName: sourceName,
+            abi: contractOutput?.abi,
+            bytecode: contractOutput?.evm?.bytecode?.object || "",
+            linkReferences: contractOutput?.evm?.bytecode?.linkReferences || {},
+            deployedBytecode: contractOutput?.evm?.deployedBytecode?.object || "",
+            deployedLinkReferences: contractOutput?.evm?.deployedBytecode?.linkReferences || {},
+          }
+          // if (contractName == "MetaSwap") {
+          //   fsExtra.writeJSON('tmp.json', artifact, { spaces: 2 })
+          // }
+          const artifactName: ArtifactName = {
+            sourceName: sourceName, 
+            contractName: contractName
+          }
+          this._cache.set(artifactName, artifact);
+        }
+      }
     }
 
-    private _generator(output: any):void {
-        
+  
+    public readArtifact(artifactName: ArtifactName): Artifact {
+        const artifact = this._cache.get(artifactName)
+        if ( artifact) {
+          return artifact
+        }
+        throw new Error("no matching artifact exists");
     }
   
-//     public async readArtifact(name: string): Promise<Artifact> {
-//       const { trueCasePath } = await import("true-case-path");
-//       const artifactPath = await this._getArtifactPath(name);
   
-//       try {
-//         const trueCaseArtifactPath = await trueCasePath(
-//           path.relative(this._artifactsPath, artifactPath),
-//           this._artifactsPath
-//         );
+    public artifactExists(artifactName: ArtifactName): boolean {
+      return this._cache.has(artifactName)
+    }
   
-//         if (artifactPath !== trueCaseArtifactPath) {
-//           throw new HardhatError(ERRORS.ARTIFACTS.WRONG_CASING, {
-//             correct: trueCaseArtifactPath,
-//             incorrect: artifactPath,
-//           });
-//         }
-  
-//         return await fsExtra.readJson(trueCaseArtifactPath);
-//       } catch (error) {
-//         if (
-//           typeof error.message === "string" &&
-//           error.message.includes("no matching file exists")
-//         ) {
-//           throw new HardhatError(ERRORS.INTERNAL.WRONG_ARTIFACT_PATH, {
-//             contractName: name,
-//             artifactPath,
-//           });
-//         }
-  
-//         // eslint-disable-next-line @nomiclabs/hardhat-internal-rules/only-hardhat-error
-//         throw error;
-//       }
-//     }
-  
-//     public readArtifactSync(name: string): Artifact {
-//       const { trueCasePathSync } = require("true-case-path");
-//       const artifactPath = this._getArtifactPathSync(name);
-  
-//       try {
-//         const trueCaseArtifactPath = trueCasePathSync(
-//           path.relative(this._artifactsPath, artifactPath),
-//           this._artifactsPath
-//         );
-  
-//         if (artifactPath !== trueCaseArtifactPath) {
-//           throw new HardhatError(ERRORS.ARTIFACTS.WRONG_CASING, {
-//             correct: trueCaseArtifactPath,
-//             incorrect: artifactPath,
-//           });
-//         }
-  
-//         return fsExtra.readJsonSync(trueCaseArtifactPath);
-//       } catch (error) {
-//         if (
-//           typeof error.message === "string" &&
-//           error.message.includes("no matching file exists")
-//         ) {
-//           throw new HardhatError(ERRORS.INTERNAL.WRONG_ARTIFACT_PATH, {
-//             contractName: name,
-//             artifactPath,
-//           });
-//         }
-  
-//         // eslint-disable-next-line @nomiclabs/hardhat-internal-rules/only-hardhat-error
-//         throw error;
-//       }
-//     }
-  
-//     public async artifactExists(name: string): Promise<boolean> {
-//       try {
-//         await this.readArtifact(name);
-//         return true;
-//       } catch (e) {
-//         return false;
-//       }
-//     }
-  
-//     public async getAllFullyQualifiedNames(): Promise<string[]> {
-//       const paths = await this.getArtifactPaths();
-//       return paths.map((p) => this._getFullyQualifiedNameFromPath(p)).sort();
-//     }
+    public getAllFullyNames(): ArtifactName[] {
+      const artifactNames: ArtifactName[] = []
+      for (let key of this._cache.keys()) {
+        artifactNames.push(key)                
+    }
+    return artifactNames
+    }
   
 //     public async getBuildInfo(
 //       fullyQualifiedName: string

@@ -2,6 +2,11 @@ export interface VerifyContract {
     bytecode:string;
   }
 
+  export interface ArtifactName {
+    contractName: string;
+    sourceName: string;
+  }
+
 
 export interface CompilerWasm {
     version:string;
