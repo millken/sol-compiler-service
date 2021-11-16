@@ -9,5 +9,5 @@ solc-bin
 .history
 .DS_Store
 /dist/
-/*.json
+*.json
 /*.txt

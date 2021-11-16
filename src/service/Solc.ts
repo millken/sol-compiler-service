@@ -131,7 +131,7 @@ class Solc implements ISolcServer {
         wasmCompile(wasmCompiler)
 
         if (wasmCompiler.outputJSON !== undefined) {
-            fsExtra.writeJson("output.json", wasmCompiler.outputJSON, { spaces: 2 });
+            //fsExtra.writeJson("output.json", wasmCompiler.outputJSON, { spaces: 2 });
             compilerRes.setContent(wasmCompiler.outputJSON)
         }
 
@@ -140,9 +140,10 @@ class Solc implements ISolcServer {
             const verifyContract:VerifyContract = {
                 bytecode: verify.getBytecode()
             }
-            //fsExtra.writeFile("input.txt", inputJSON);
-            //fsExtra.writeJSONSync("input.json", JSON.parse(call.request.getInputjson()));
-            new Artifacts(wasmCompiler.outputJSON)
+
+            //fsExtra.writeFile("input.txt", `${inputJSON}`);
+            //fsExtra.writeJSONSync("input.json", JSON.parse(new String(inputJSON).toString()));
+            new Artifacts(inputJSON as any, wasmCompiler.outputJSON)
             log(verify.getVersion())
         }
 

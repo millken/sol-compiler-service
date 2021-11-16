@@ -7,6 +7,9 @@ export interface VerifyContract {
     sourceName: string;
   }
 
+  export function ArtifactNameToString(artifactName: ArtifactName): string {
+    return artifactName.sourceName + "\t" + artifactName.contractName
+  }
 
 export interface CompilerWasm {
     version:string;
@@ -38,6 +41,19 @@ export interface Artifact {
     deployedLinkReferences: LinkReferences;
   }
   
+export interface Artifacts {
+
+  readArtifact(artifactName: ArtifactName): Artifact
+
+  artifactExists(artifactName: ArtifactName): boolean
+
+  getAllFullyNames(): ArtifactName[]
+  
+  getCompilerOutput(): CompilerOutput
+
+}
+
+
   /**
    * A DebugFile contains any extra information about a Solidity contract that
    * Hardhat and its plugins need.

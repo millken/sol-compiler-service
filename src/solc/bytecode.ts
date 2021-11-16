@@ -1,13 +1,15 @@
-import {
-  Artifacts,
-  BuildInfo,
-  CompilerInput,
-  CompilerOutput,
-  CompilerOutputBytecode
-} from 'hardhat/types'
-import { parseFullyQualifiedName } from 'hardhat/utils/contract-names'
+
 
 import { inferSolcVersion, measureExecutableSectionLength } from './metadata'
+import {
+  Artifacts,
+  Artifact,
+  CompilerOutput,
+  CompilerInput,
+  ArtifactName,
+  ArtifactNameToString,
+  CompilerOutputBytecode,
+} from './types'
 
 interface BytecodeExtractedData {
   immutableValues: ImmutableValues;
@@ -32,9 +34,9 @@ type ContractName = string;
 // This is actually extended by the TASK_VERIFY_GET_CONTRACT_INFORMATION subtask
 // to add the libraries that are not detectable to the context.
 export interface ContractInformation extends BytecodeExtractedData {
-  compilerInput: CompilerInput;
+  //compilerInput: CompilerInput;
   compilerOutput: CompilerOutput;
-  solcVersion: string;
+  //solcVersion: string;
   sourceName: SourceName;
   contractName: ContractName;
   contract: CompilerOutput['contracts'][SourceName][ContractName];
@@ -116,33 +118,20 @@ export class Bytecode {
 
 export async function lookupMatchingBytecode (
   artifacts: Artifacts,
-  matchingCompilerVersions: string[],
   deployedBytecode: Bytecode
 ): Promise<ContractInformation[]> {
   const contractMatches = []
-  const fqNames = await artifacts.getAllFullyQualifiedNames()
+  const fqNames = await artifacts.getAllFullyNames()
 
   for (const fqName of fqNames) {
-    const buildInfo = await artifacts.getBuildInfo(fqName)
 
-    if (buildInfo === undefined) {
+    if (!deployedBytecode.isOvmInferred()) {
       continue
     }
-
-    if (
-      !matchingCompilerVersions.includes(buildInfo.solcVersion) &&
-      // if OVM, we will not have matching compiler versions because we can't infer a specific OVM solc version from the bytecode
-      !deployedBytecode.isOvmInferred()
-    ) {
-      continue
-    }
-
-    const { sourceName, contractName } = parseFullyQualifiedName(fqName)
 
     const contractInformation = await extractMatchingContractInformation(
-      sourceName,
-      contractName,
-      buildInfo,
+      artifacts.readArtifact(fqName),
+      artifacts.getCompilerOutput(),
       deployedBytecode
     )
     if (contractInformation !== null) {
@@ -154,12 +143,11 @@ export async function lookupMatchingBytecode (
 }
 
 export async function extractMatchingContractInformation (
-  sourceName: SourceName,
-  contractName: ContractName,
-  buildInfo: BuildInfo,
+  artifact: Artifact,
+  compilerOutput: CompilerOutput,
   deployedBytecode: Bytecode
 ): Promise<ContractInformation | null> {
-  const contract = buildInfo.output.contracts[sourceName][contractName]
+  const contract = compilerOutput.contracts[artifact.sourceName][artifact.contractName]
   // Normalize deployed bytecode according to this contract.
   const { deployedBytecode: runtimeBytecodeSymbols } = contract.evm
 
@@ -175,12 +163,14 @@ export async function extractMatchingContractInformation (
     runtimeBytecodeSymbols
   )
 
+  const sourceName: SourceName = artifact.sourceName
+  const contractName: ContractName = artifact.contractName
   if (analyzedBytecode !== null) {
     return {
       ...analyzedBytecode,
-      compilerInput: buildInfo.input,
-      compilerOutput: buildInfo.output,
-      solcVersion: buildInfo.solcVersion,
+      //compilerInput: buildInfo.input,
+      compilerOutput: compilerOutput,
+      //solcVersion: buildInfo.solcVersion,
       sourceName,
       contractName,
       contract
