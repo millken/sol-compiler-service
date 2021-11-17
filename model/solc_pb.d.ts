@@ -124,8 +124,10 @@ export namespace CompilerSources {
 export class CompilerResponse extends jspb.Message { 
     getContent(): string;
     setContent(value: string): CompilerResponse;
-    getVerified(): string;
-    setVerified(value: string): CompilerResponse;
+    clearVerifiedList(): void;
+    getVerifiedList(): Array<VerifyResponse>;
+    setVerifiedList(value: Array<VerifyResponse>): CompilerResponse;
+    addVerified(value?: VerifyResponse, index?: number): VerifyResponse;
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): CompilerResponse.AsObject;
@@ -140,7 +142,7 @@ export class CompilerResponse extends jspb.Message {
 export namespace CompilerResponse {
     export type AsObject = {
         content: string,
-        verified: string,
+        verifiedList: Array<VerifyResponse.AsObject>,
     }
 }
 
@@ -167,48 +169,25 @@ export namespace Verify {
     }
 }
 
-export class VerifierRequest extends jspb.Message { 
-    getVersion(): string;
-    setVersion(value: string): VerifierRequest;
-    getBytecodefromchain(): string;
-    setBytecodefromchain(value: string): VerifierRequest;
-    getBytecodefromcompiler(): string;
-    setBytecodefromcompiler(value: string): VerifierRequest;
+export class VerifyResponse extends jspb.Message { 
+    getSourcename(): string;
+    setSourcename(value: string): VerifyResponse;
+    getContractname(): string;
+    setContractname(value: string): VerifyResponse;
 
     serializeBinary(): Uint8Array;
-    toObject(includeInstance?: boolean): VerifierRequest.AsObject;
-    static toObject(includeInstance: boolean, msg: VerifierRequest): VerifierRequest.AsObject;
+    toObject(includeInstance?: boolean): VerifyResponse.AsObject;
+    static toObject(includeInstance: boolean, msg: VerifyResponse): VerifyResponse.AsObject;
     static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
     static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-    static serializeBinaryToWriter(message: VerifierRequest, writer: jspb.BinaryWriter): void;
-    static deserializeBinary(bytes: Uint8Array): VerifierRequest;
-    static deserializeBinaryFromReader(message: VerifierRequest, reader: jspb.BinaryReader): VerifierRequest;
+    static serializeBinaryToWriter(message: VerifyResponse, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): VerifyResponse;
+    static deserializeBinaryFromReader(message: VerifyResponse, reader: jspb.BinaryReader): VerifyResponse;
 }
 
-export namespace VerifierRequest {
+export namespace VerifyResponse {
     export type AsObject = {
-        version: string,
-        bytecodefromchain: string,
-        bytecodefromcompiler: string,
-    }
-}
-
-export class VerifierResponse extends jspb.Message { 
-    getVerified(): boolean;
-    setVerified(value: boolean): VerifierResponse;
-
-    serializeBinary(): Uint8Array;
-    toObject(includeInstance?: boolean): VerifierResponse.AsObject;
-    static toObject(includeInstance: boolean, msg: VerifierResponse): VerifierResponse.AsObject;
-    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-    static serializeBinaryToWriter(message: VerifierResponse, writer: jspb.BinaryWriter): void;
-    static deserializeBinary(bytes: Uint8Array): VerifierResponse;
-    static deserializeBinaryFromReader(message: VerifierResponse, reader: jspb.BinaryReader): VerifierResponse;
-}
-
-export namespace VerifierResponse {
-    export type AsObject = {
-        verified: boolean,
+        sourcename: string,
+        contractname: string,
     }
 }

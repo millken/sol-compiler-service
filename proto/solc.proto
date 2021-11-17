@@ -31,7 +31,7 @@ message CompilerSources {
 }
 message CompilerResponse { 
   string content = 1; 
-  string verified = 2;
+  repeated VerifyResponse verified = 2;
 }
 
 message Verify {
@@ -39,16 +39,12 @@ message Verify {
   string bytecode = 2;
 }
 
-message VerifierRequest {
-  string version = 1;
-  string bytecodeFromChain = 2;
-  string bytecodeFromCompiler = 3;
+message VerifyResponse { 
+  string sourceName = 1;
+  string contractName = 2; 
 }
-
-message VerifierResponse { bool verified = 1; }
 
 service Solc {
   rpc compilerStandardJSON(CompilerRequest) returns (CompilerResponse) {};
   rpc compiler(CompilerRequest) returns (CompilerResponse) {};
-  rpc verifier(VerifierRequest) returns (VerifierResponse) {};
 }

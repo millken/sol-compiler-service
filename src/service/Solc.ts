@@ -8,22 +8,22 @@ import { SolcService, ISolcService, ISolcServer } from '../../model/solc_grpc_pb
 import {
     CompilerRequest,
     CompilerResponse,
-    VerifierRequest,
-    VerifierResponse,
+    VerifyResponse,
     CompilerOptimizer,
     CompilerSettings
 } from '../../model/solc_pb'
-import { ServiceError,hasCompilationErrors } from '../util'
+import { ServiceError, hasCompilationErrors } from '../util'
 import { getWasmCompiler, wasmCompile } from '../solc/compiler'
-import {VerifyContract, CompilerWasm} from '../solc/types'
+import { CompilerWasm } from '../solc/types'
 import debug from 'debug'
 import { Artifacts } from '../solc/artifacts';
+import { Bytecode, lookupMatchingBytecode } from '../solc/bytecode';
 
 const log = debug('service:solc')
 class Solc implements ISolcServer {
     [method: string]: UntypedHandleCall;
 
-    public compiler(call: ServerUnaryCall<CompilerRequest, CompilerResponse>, callback: sendUnaryData<CompilerResponse>): void {
+    public async compiler(call: ServerUnaryCall<CompilerRequest, CompilerResponse>, callback: sendUnaryData<CompilerResponse>): Promise<void> {
         log("request compiler")
 
         const version = call.request.getVersion()
@@ -85,27 +85,38 @@ class Solc implements ISolcServer {
             input.sources[sources[k].getName() || ''] = { content: sources[k].getContent() || '' }
         }
         wasmCompiler.inputJSON = JSON.stringify(input)
-        
+
         const compilerRes = new CompilerResponse()
 
         wasmCompile(wasmCompiler)
 
-        if (wasmCompiler.outputJSON) {
-            compilerRes.setContent(wasmCompiler.outputJSON)
+        if (wasmCompiler.outputJSON !== undefined) {
+            compilerRes.setContent(JSON.stringify(wasmCompiler.outputJSON))
         }
-        console.log(compilerRes.getContent())
-
         const verify = call.request.getVerify()
-        if(verify) {
-            const verifyContract:VerifyContract = {
-                bytecode: verify.getBytecode()
+        if (verify !== undefined) {
+            //fsExtra.writeFile("input.txt", `${inputJSON}`);
+            //fsExtra.writeJSONSync("input.json", JSON.parse(new String(inputJSON).toString()));
+
+            const artifacts = new Artifacts({} as any, wasmCompiler.outputJSON)
+            const deployedBytecode = new Bytecode(verify.getBytecode())
+            const contractMatches = await lookupMatchingBytecode(
+                artifacts,
+                deployedBytecode
+            );
+            if (contractMatches.length > 0) {
+                for (const contract of contractMatches) {
+                    const verifyRes: VerifyResponse = new VerifyResponse()
+                    verifyRes.setSourcename(contract.sourceName)
+                    verifyRes.setContractname(contract.contractName)
+                    compilerRes.addVerified(verifyRes)
+                }
             }
-            log(verify.getVersion())
         }
         callback(null, compilerRes);
     }
 
-    public compilerStandardJSON(call: ServerUnaryCall<CompilerRequest, CompilerResponse>, callback: sendUnaryData<CompilerResponse>): void {
+    public async compilerStandardJSON(call: ServerUnaryCall<CompilerRequest, CompilerResponse>, callback: sendUnaryData<CompilerResponse>): Promise<void> {
         log("request compilerStandardJSON")
         const version = call.request.getVersion()
         if (version === '') {
@@ -132,26 +143,33 @@ class Solc implements ISolcServer {
 
         if (wasmCompiler.outputJSON !== undefined) {
             //fsExtra.writeJson("output.json", wasmCompiler.outputJSON, { spaces: 2 });
-            compilerRes.setContent(wasmCompiler.outputJSON)
+            compilerRes.setContent(JSON.stringify(wasmCompiler.outputJSON))
         }
 
         const verify = call.request.getVerify()
-        if(verify !== undefined) {
-            const verifyContract:VerifyContract = {
-                bytecode: verify.getBytecode()
-            }
-
+        if (verify !== undefined) {
             //fsExtra.writeFile("input.txt", `${inputJSON}`);
             //fsExtra.writeJSONSync("input.json", JSON.parse(new String(inputJSON).toString()));
-            new Artifacts(inputJSON as any, wasmCompiler.outputJSON)
-            log(verify.getVersion())
+
+            const artifacts = new Artifacts({} as any, wasmCompiler.outputJSON)
+            const deployedBytecode = new Bytecode(verify.getBytecode())
+            const contractMatches = await lookupMatchingBytecode(
+                artifacts,
+                deployedBytecode
+            );
+            if (contractMatches.length > 0) {
+                for (const contract of contractMatches) {
+                    const verifyRes: VerifyResponse = new VerifyResponse()
+                    verifyRes.setSourcename(contract.sourceName)
+                    verifyRes.setContractname(contract.contractName)
+                    compilerRes.addVerified(verifyRes)
+                }
+            }
         }
 
         callback(null, compilerRes);
     }
 
-    public verifier(call: ServerUnaryCall<VerifierRequest, VerifierResponse>, callback: sendUnaryData<VerifierResponse>): void {
-    }
 }
 
 export {

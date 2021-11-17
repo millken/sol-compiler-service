@@ -121,14 +121,13 @@ export async function lookupMatchingBytecode (
   deployedBytecode: Bytecode
 ): Promise<ContractInformation[]> {
   const contractMatches = []
-  const fqNames = await artifacts.getAllFullyNames()
+  const fqNames = artifacts.getAllFullyNames()
 
   for (const fqName of fqNames) {
 
-    if (!deployedBytecode.isOvmInferred()) {
-      continue
-    }
-
+    // if (!deployedBytecode.isOvmInferred()) {
+    //   continue
+    // }
     const contractInformation = await extractMatchingContractInformation(
       artifacts.readArtifact(fqName),
       artifacts.getCompilerOutput(),

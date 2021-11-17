@@ -1,6 +1,3 @@
-export interface VerifyContract {
-    bytecode:string;
-  }
 
   export interface ArtifactName {
     contractName: string;
@@ -48,7 +45,7 @@ export interface Artifacts {
   artifactExists(artifactName: ArtifactName): boolean
 
   getAllFullyNames(): ArtifactName[]
-  
+
   getCompilerOutput(): CompilerOutput
 
 }
