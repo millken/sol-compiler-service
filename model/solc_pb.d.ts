@@ -174,6 +174,8 @@ export class VerifyResponse extends jspb.Message {
     setSourcename(value: string): VerifyResponse;
     getContractname(): string;
     setContractname(value: string): VerifyResponse;
+    getNormalizedbytecode(): string;
+    setNormalizedbytecode(value: string): VerifyResponse;
 
     serializeBinary(): Uint8Array;
     toObject(includeInstance?: boolean): VerifyResponse.AsObject;
@@ -189,5 +191,6 @@ export namespace VerifyResponse {
     export type AsObject = {
         sourcename: string,
         contractname: string,
+        normalizedbytecode: string,
     }
 }

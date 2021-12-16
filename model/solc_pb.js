@@ -1405,7 +1405,8 @@ proto.iotex.VerifyResponse.prototype.toObject = function(opt_includeInstance) {
 proto.iotex.VerifyResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     sourcename: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    contractname: jspb.Message.getFieldWithDefault(msg, 2, "")
+    contractname: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    normalizedbytecode: jspb.Message.getFieldWithDefault(msg, 3, "")
   };
 
   if (includeInstance) {
@@ -1450,6 +1451,10 @@ proto.iotex.VerifyResponse.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {string} */ (reader.readString());
       msg.setContractname(value);
       break;
+    case 3:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setNormalizedbytecode(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -1493,6 +1498,13 @@ proto.iotex.VerifyResponse.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getNormalizedbytecode();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
 };
 
 
@@ -1529,6 +1541,24 @@ proto.iotex.VerifyResponse.prototype.getContractname = function() {
  */
 proto.iotex.VerifyResponse.prototype.setContractname = function(value) {
   return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * optional string normalizedBytecode = 3;
+ * @return {string}
+ */
+proto.iotex.VerifyResponse.prototype.getNormalizedbytecode = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.iotex.VerifyResponse} returns this
+ */
+proto.iotex.VerifyResponse.prototype.setNormalizedbytecode = function(value) {
+  return jspb.Message.setProto3StringField(this, 3, value);
 };
 
 

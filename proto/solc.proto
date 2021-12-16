@@ -42,6 +42,7 @@ message Verify {
 message VerifyResponse { 
   string sourceName = 1;
   string contractName = 2; 
+  string normalizedBytecode = 3;
 }
 
 service Solc {

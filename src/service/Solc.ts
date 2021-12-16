@@ -109,6 +109,7 @@ class Solc implements ISolcServer {
                     const verifyRes: VerifyResponse = new VerifyResponse()
                     verifyRes.setSourcename(contract.sourceName)
                     verifyRes.setContractname(contract.contractName)
+                    verifyRes.setNormalizedbytecode(contract.normalizedBytecode)
                     compilerRes.addVerified(verifyRes)
                 }
             }
@@ -162,6 +163,7 @@ class Solc implements ISolcServer {
                     const verifyRes: VerifyResponse = new VerifyResponse()
                     verifyRes.setSourcename(contract.sourceName)
                     verifyRes.setContractname(contract.contractName)
+                    verifyRes.setNormalizedbytecode(contract.normalizedBytecode)
                     compilerRes.addVerified(verifyRes)
                 }
             }
