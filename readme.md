@@ -15,6 +15,11 @@ npm run build:proto # *.proto
 npm run build # *.ts
 ```
 
+docker run
+```
+docker run --name solc  -v /path/to/solcbin/:/app/solc-bin:ro -e PORT=50051 -e DEBUG=true -e SOLJSON_PATH=/app/solc-bin --publish 50051:50051 millken/sol-compiler-service
+```
+
 ## Server Start
 
 ```sh
