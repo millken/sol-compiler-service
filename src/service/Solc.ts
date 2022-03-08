@@ -51,14 +51,17 @@ class Solc implements ISolcServer {
                     enabled: false,
                     runs: 200
                 },
+                metadata: {
+                    useLiteralContent: true
+                },
                 // evmVersion: '',
                 outputSelection: {
                     '*': {
                         '*': ['abi', 'metadata', 'evm.bytecode', 'evm.deployedBytecode', 'evm.methodIdentifiers', 'evm.gasEstimates']
                     }
                 }
-            }
-        }
+            },
+       }
         const optimizer = { enabled: false, runs: 200 }
         const settings = call.request.getSettings()
         if (settings === undefined) {
