@@ -62,9 +62,8 @@ jobs:
           push: true
           # see https://github.com/docker-library/bashbrew/blob/v0.1.1/architecture/oci-platform.go
           platforms: |
-            linux/386
             linux/amd64
-            linux/arm64
+            linux/arm64/v8
           build-args: |
               APP_VERSION=${{ env.APP_VERSION }}
           tags: |
