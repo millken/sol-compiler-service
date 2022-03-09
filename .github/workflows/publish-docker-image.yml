@@ -1,7 +1,5 @@
 name: Build and Publish Docker Image
 
-# refer to https://blog.isayme.org/posts/issues-55/
-
 on:
   push:
     # branches:
@@ -14,7 +12,6 @@ env:
   REGISTRY: docker.io
   # <repo>
   IMAGE_NAME: ${{ github.event.repository.name }}
-
 
 jobs:
   build:
@@ -63,7 +60,6 @@ jobs:
           # see https://github.com/docker-library/bashbrew/blob/v0.1.1/architecture/oci-platform.go
           platforms: |
             linux/amd64
-            linux/arm64
           build-args: |
               APP_VERSION=${{ env.APP_VERSION }}
           tags: |
