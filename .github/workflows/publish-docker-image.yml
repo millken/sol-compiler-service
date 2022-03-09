@@ -68,5 +68,6 @@ jobs:
           build-args: |
               APP_VERSION=${{ env.APP_VERSION }}
           tags: |
-            ${{ env.DOCKERHUB_REPO }}:${{ env.APP_VERSION }}
+            latest
+            ${{ env.APP_VERSION }}
           labels: ${{ steps.meta.outputs.labels }}
