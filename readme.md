@@ -1,4 +1,4 @@
-# node-grpc-typescript
+# node-grpc-typescript [![Build and Publish Docker Image](https://github.com/millken/sol-compiler-service/actions/workflows/publish-docker-image.yml/badge.svg)](https://github.com/millken/sol-compiler-service/actions/workflows/publish-docker-image.yml)
 
 Solidity contracts compiler
 

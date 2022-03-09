@@ -68,7 +68,6 @@ jobs:
             linux/arm64/v8
           build-args: |
               APP_VERSION=${{ env.APP_VERSION }}
-          push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.DOCKERHUB_REPO }}:latest
             ${{ env.DOCKERHUB_REPO }}:${{ env.APP_VERSION }}
