@@ -18,6 +18,7 @@ import { CompilerWasm } from '../solc/types'
 import debug from 'debug'
 import { Artifacts } from '../solc/artifacts';
 import { Bytecode, lookupMatchingBytecode } from '../solc/bytecode';
+import { getShortVersion } from '../solc/version';
 
 const log = debug('service:solc')
 class Solc implements ISolcServer {
@@ -104,6 +105,7 @@ class Solc implements ISolcServer {
             const artifacts = new Artifacts({} as any, wasmCompiler.outputJSON)
             const deployedBytecode = new Bytecode(verify.getBytecode())
             const contractMatches = await lookupMatchingBytecode(
+                getShortVersion(version),
                 artifacts,
                 deployedBytecode
             );
@@ -158,6 +160,7 @@ class Solc implements ISolcServer {
             const artifacts = new Artifacts({} as any, wasmCompiler.outputJSON)
             const deployedBytecode = new Bytecode(verify.getBytecode())
             const contractMatches = await lookupMatchingBytecode(
+                getShortVersion(version),
                 artifacts,
                 deployedBytecode
             );

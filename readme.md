@@ -28,16 +28,6 @@ node dist/server
 npm start
 ```
 
-## Client Test
+## Link
 
-```sh
-# 1. Request
-# 2. with Parameter
-npm run client blahblahblah
-# 3. Error
-npm run client error
-# 4. Stream
-npm run client stream
-# 5. Health Check
-npm run health
-```
+https://searchcode.com/file/309900902/docs/metadata.rst/

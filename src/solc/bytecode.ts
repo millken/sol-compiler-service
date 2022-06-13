@@ -10,6 +10,7 @@ import {
   ArtifactNameToString,
   CompilerOutputBytecode,
 } from './types'
+import compareVersions from 'compare-versions'
 
 interface BytecodeExtractedData {
   immutableValues: ImmutableValues;
@@ -117,6 +118,7 @@ export class Bytecode {
 }
 
 export async function lookupMatchingBytecode (
+  version: string,
   artifacts: Artifacts,
   deployedBytecode: Bytecode
 ): Promise<ContractInformation[]> {
@@ -129,6 +131,7 @@ export async function lookupMatchingBytecode (
     //   continue
     // }
     const contractInformation = await extractMatchingContractInformation(
+      version,
       artifacts.readArtifact(fqName),
       artifacts.getCompilerOutput(),
       deployedBytecode
@@ -142,6 +145,7 @@ export async function lookupMatchingBytecode (
 }
 
 export async function extractMatchingContractInformation (
+  version: string,
   artifact: Artifact,
   compilerOutput: CompilerOutput,
   deployedBytecode: Bytecode
@@ -158,6 +162,7 @@ export async function extractMatchingContractInformation (
   }
 
   const analyzedBytecode = await compareBytecode(
+    version,
     deployedBytecode,
     runtimeBytecodeSymbols
   )
@@ -180,6 +185,7 @@ export async function extractMatchingContractInformation (
 }
 
 export async function compareBytecode (
+  version: string,
   deployedBytecode: Bytecode,
   runtimeBytecodeSymbols: CompilerOutputBytecode
 ): Promise<BytecodeExtractedData | null> {
@@ -209,10 +215,29 @@ export async function compareBytecode (
     runtimeBytecodeSymbols
   )
 
-  if (
-    normalizedBytecode.slice(0, deployedExecutableSection.length) ===
-    referenceBytecode.slice(0, deployedExecutableSection.length)
-  ) {
+  let normalizedCode = normalizedBytecode.slice(0, deployedExecutableSection.length)
+  let referenceCode = referenceBytecode.slice(0, deployedExecutableSection.length)
+  let matchCode = '_-';
+  if (compareVersions(version, "0.6.0") >= 0) {
+    matchCode = 'a264697066735822';
+  } else if (compareVersions(version, "0.5.11") >= 0) {
+    matchCode = 'a265627a7a72315820';
+  } else if (compareVersions(version, "0.5.10") >= 0) {
+    matchCode = 'a265627a7a72305820';
+  } else if (compareVersions(version, "0.4.7") >= 0) {
+    matchCode = 'a165627a7a72305820';
+  }
+
+  const pos1 = normalizedCode.indexOf(matchCode)
+  if (pos1 > 0){
+    normalizedCode = normalizedCode.slice(0, pos1)
+  }
+  const pos2 = referenceCode.indexOf(matchCode)
+  if (pos1 > 0){
+    referenceCode = referenceCode.slice(0, pos2)
+  }
+
+  if ( normalizedCode === referenceCode) {
     // The bytecode matches
     return {
       immutableValues,
